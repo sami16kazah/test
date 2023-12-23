@@ -2,7 +2,7 @@ import UserModel from '../models/user.js';
 import { compares } from '../utils/AES.js';
 import Jwt from 'jsonwebtoken';
 export const getLoginPage = (req, res, next) => {
-  res.send('hello');
+  res.send('hello my friend');
 };
 
 export const AddUser = async (req, res, next) => {
