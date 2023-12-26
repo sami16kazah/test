@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <title>User Info Page</title>
+    <link rel="stylesheet" type="text/css" href="style/home.css" />
+  </head>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="openpgp/dist/openpgp.min.js"></script>
+  <body>
+    <p > <h1 class="page">User Info Page</h1> </p>
+    <div class="container">
+      <div class="form-input">
+        <label> User number </label>
+        <span id = "userNumber"> <%=number %> </span>
+        <label> User phone number </label>
+        <span id = "userPhone"> <%=phone %> </span>
+        <label> User city </label>
+        <span id = "userCity"> <%=city %> </span>
+        <a href="/" class="form-input" style="color: black ;  text-decoration: none; margin-top: -10px; margin-bottom: 10px; margin-left: -3px;">Back to Home </a> 
+      </div>
+ 
+    </div>
+
+    <script type="module">
+        var keys = {publicKey:'', privatKey:'',serverKey:''};
+        var  passphrase = 'ZRquaXCjT4ibThjNtz9gh/03fyxoBrIWOSNAc7dWh+uCepWBkZJvtrwiXtEj2EhR';
+        var user_id = "<%= id %>";
+        console.log('user id is ' , user_id);
+     const generateKeyPair = async (keys) => {
+     const { publicKey, privateKey } = await openpgp.generateKey({
+      curve: 'ed25519',
+      userIDs: [
+       {
+        id: user_id
+       },
+          ],
+    passphrase: 'ZRquaXCjT4ibThjNtz9gh/03fyxoBrIWOSNAc7dWh+uCepWBkZJvtrwiXtEj2EhR',
+  });
+  //console.log(publicKey, privateKey);
+  keys.publicKey = publicKey;
+  keys.privatKey = privateKey;
+  return ;
+
+};
+        var socket = io();
+        socket.on('handshake',  (payload)=> {
+           keys.serverKey = payload.server_key;
+           socket.emit('handshake2',{
+            user_id: user_id
+           })
+        socket.on('join',async (payload)=>{
+          console.log('generating keys');
+            await generateKeyPair(keys);
+          console.log('emitting keys');
+            socket.emit('sendkey',{
+            ClientPublicKey:keys.publicKey
+           })
+
+        })   
+        });
+
+        socket.on('confirm keys',async (message) => {
+          const publicKey = await openpgp.readKey({
+        armoredKey: keys.serverKey,
+      });
+      
+
+      const privateKey = await openpgp.decryptKey({
+        privateKey: await openpgp.readPrivateKey({
+          armoredKey: keys.privatKey,
+        }),
+        passphrase,
+      });
+    
+            const msg = await openpgp.readMessage({
+            armoredMessage:message.message // parse armored message
+                });
+                
+          openpgp.decrypt({
+          message: msg,
+          decryptionKeys: privateKey
+        }).then(plaintext => {
+         // get the plain text
+         const text = plaintext.data;
+        console.log('decrypted message: ' + text);
+           })
+
+          });
+
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="style/login.css" />
+  </head>
+  <body>
+    <p > <h1 class="page">Login Page</h1> </p>
+    <div class="container">
+      <form action="/login" method="POST" class="form-input">
+        <input name="email" type="email" placeholder="email" required />
+        <input name="password" type="password" placeholder="password" required />
+        <button type="submit" class="loginButton">Login</button>
+        <% if(error) { %>
+          <div><p class="errors"> <%= error %> </p></div>
+          <% } %>
+        <a href="/signup">Don't you have an account</a>
+      </form>
+    </div>
+  </body>
+</html>

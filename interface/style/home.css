@@ -1,0 +1,70 @@
+.container {
+  background-color: greenyellow;
+  margin: auto;
+  padding-top: 10px;
+  margin-top: 10%;
+  width: 50%;
+  height: fit-content;
+  border-radius: 20px;
+  box-shadow: 16px 20px 20px 0px black;
+}
+.errors {
+  color: red;
+}
+body {
+  background-color: cadetblue;
+}
+
+.form-input {
+  margin: 60px 0px 0px 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page {
+  margin: auto;
+  color: antiquewhite;
+  text-align: center;
+  font-family: Calibri;
+  margin-bottom: -80px;
+  margin-top: 20px;
+}
+label {
+  margin: auto;
+  margin-bottom: 5%;
+  color: black;
+  font-family: Calibri;
+  border: 10px black;
+  border-radius: 10px;
+  text-align: center;
+}
+
+span {
+  background-color: wheat;
+  border-radius: 20px;
+  padding: 20px;
+  width: 50%;
+  margin-bottom: 20px;
+  margin-top: -10px;
+  opacity: 0.5;
+  box-shadow: 1px 20px 20px 0px black;
+  text-align: center;
+}
+
+a {
+  cursor: pointer;
+  background-color: wheat;
+  border-radius: 20px;
+  padding: 20px;
+  width: 50%;
+  margin-bottom: 20px;
+  margin-top: -10px;
+  opacity: 0.5;
+  box-shadow: 1px 20px 20px 0px black;
+  text-align: center;
+  margin-right: 10px;
+}
+a:hover {
+  background-color: white;
+}

@@ -1,0 +1,29 @@
+
+<html>
+  <head>
+    <title>Sign Up</title>
+    <link rel="stylesheet" type="text/css" href="style/login.css" />
+  </head>
+  <body>
+    <p > <h1 class="page">Signup Page</h1> </p>
+    <div class="container">
+      <form action="/signup" method="POST" class="form-input" >
+        <input  type="text" placeholder="name" name="name" id="name" required/>
+        <input type="email" placeholder="email"  name="email" id="email" required/>
+        <input type="password" placeholder="password" name="password" id="password" required />
+        <label >Choose user type :</label>
+        <select  id="type"  name="type">
+          <option  value="student">Student</option>
+          <option value="dr">Doctor</option>
+        </select>
+        <button type="submit" class="loginButton">Sign Up</button>
+        <% if(error) { %>
+        <div><p class="errors"> <%= error %> </p></div>
+        <% } %>
+        <a href="/login"> Do you have an account !</a>
+      </form>
+      
+    
+    </div>
+  </body>
+</html>

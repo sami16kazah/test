@@ -1,25 +1,34 @@
 import express from 'express';
 import { rateLimiterMiddleware } from '../middleware/rateLimiter.js';
-import { getLoginPage, AddUser, Login } from '../controller/auth.js';
+import {
+  getLoginPage,
+  AddUser,
+  Login,
+  getSignup,
+  getHome,
+  getadditionalinfo,
+  getInfo,
+  logout,
+} from '../controller/auth.js';
 import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validationResult.js';
 import { isLoggedin } from '../middleware/isLoggedIn.js';
 import { isDoctor } from '../middleware/IsDoctor.js';
 let router = express.Router();
 
-router.get('/signup', rateLimiterMiddleware);
+router.get('/signup', rateLimiterMiddleware, getSignup);
 router.post(
   '/signup',
   rateLimiterMiddleware,
   [
     // Validate the request body
-    body('name').isString().notEmpty(),
+    body('name').isString().notEmpty().withMessage('name must be string'),
     body('email').isEmail().notEmpty().withMessage('Email Must Be Valid !'),
     body('password')
       .isString()
       .notEmpty()
       .trim()
-      .isLength({ min: 6, max: 20 })
+
       .withMessage('Password Must Be Between 6 And 20 Characters !'),
     body('type')
       .isString()
@@ -47,7 +56,7 @@ router.post(
       .isString()
       .notEmpty()
       .trim()
-      .isLength({ min: 6, max: 20 })
+
       .withMessage('Password Must Be Between 6 And 20 Characters !'),
 
     // Validate the request query
@@ -56,7 +65,13 @@ router.post(
 
   Login
 );
-router.get('/home', rateLimiterMiddleware, isLoggedin, (req, res, next) => {
-  res.send('hello from home');
-});
+router.get('/', rateLimiterMiddleware, isLoggedin, getHome);
+router.get(
+  '/additionalinfo',
+  rateLimiterMiddleware,
+  isLoggedin,
+  getadditionalinfo
+);
+router.get('/previewInfo', rateLimiterMiddleware, isLoggedin, getInfo);
+router.post('/logout', logout);
 export default router;
