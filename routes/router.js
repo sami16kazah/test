@@ -14,6 +14,7 @@ import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validationResult.js';
 import { isLoggedin } from '../middleware/isLoggedIn.js';
 import { isDoctor } from '../middleware/IsDoctor.js';
+
 let router = express.Router();
 
 router.get('/signup', rateLimiterMiddleware, getSignup);

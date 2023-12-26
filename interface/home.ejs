@@ -152,7 +152,15 @@
            })
           });
           });
-        
+          
+          socket.emit('login', user_id.trim());
+          // Listen for 'alert' event to display alerts
+         socket.on('alert', (message) => {
+         alert(message);
+         // Redirect or handle the alert as needed
+         });
+
+  
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
       <script>

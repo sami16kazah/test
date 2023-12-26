@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import router from './routes/router.js';
 import cookieSession from 'cookie-session';
+import session from 'express-session';
 
 // to access .env variables
 dotenv.config();
@@ -21,10 +22,14 @@ app.use(express.urlencoded({ extended: false }));
 //app.use(helmet());
 // to prevent mongo injection attack
 //app.use(mongoSanitize());
+
 app.use(
   cookieSession({
     // signed false to https only
     //signed : false,
+    name: 'session',
+    resave: false,
+    saveUninitialized: true, // save empty session to track visitors
     secret: process.env.COOKIE_KEY,
     maxAge: 604800000, // one week before expire
   })

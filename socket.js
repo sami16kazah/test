@@ -2,7 +2,7 @@ import openpgp from 'openpgp';
 import AdditionalInformationModel from './models/additionalInfo.js';
 const passphrase = `ZRquaXCjT4ibThjNtz9gh/03fyxoBrIWOSNAc7dWh+uCepWBkZJvtrwiXtEj2EhR`;
 
-export default function (socket, io, keys) {
+export default function (socket, io, keys, users, firstUser) {
   socket.emit('handshake', {
     to: 'client ',
     from: 'Server',
@@ -151,6 +151,4 @@ export default function (socket, io, keys) {
         }
       });
   });
-
-  socket.on('disconnect', () => {});
 }

@@ -98,6 +98,13 @@ export const getInfo = async (req, res, next) => {
   });
 };
 export const logout = (req, res, next) => {
-  req.session = null;
+  if (req.session) {
+    // Expire the cookie immediately
+    req.session = null;
+    console.log('user logged out');
+    res.cookie('session', '', { expires: new Date(0) });
+
+    return res.redirect('/');
+  }
   return res.redirect('/');
 };
