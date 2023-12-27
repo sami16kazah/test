@@ -118,7 +118,7 @@
             message: responseMessage,
             signingKeys:privateKey,
            })
-    
+       
            const encrypt = await openpgp.encrypt({
            message: responseMessage,
            encryptionKeys: publicKey,
@@ -171,6 +171,26 @@
          alert(message);
          // Redirect or handle the alert as needed
          });
+         socket.on('UnSignError',async (successMsg)=>{
+            const privateKey = await openpgp.decryptKey({
+            privateKey: await openpgp.readPrivateKey({
+             armoredKey: keys.privatKey,
+            }),
+            passphrase,
+           });
+            const msg = await openpgp.readMessage({
+            armoredMessage:successMsg.encrypt // parse armored message
+                });
+                
+          openpgp.decrypt({
+          message: msg,
+          decryptionKeys: privateKey
+        }).then(plaintext => {
+         // get the plain text
+         const text = plaintext.data;
+        alert( text);
+           })
+          });
 
   
       </script>
