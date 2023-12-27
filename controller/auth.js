@@ -2,6 +2,7 @@ import UserModel from '../models/user.js';
 import AdditionalInformationModel from '../models/additionalInfo.js';
 import { compares } from '../utils/AES.js';
 import Jwt from 'jsonwebtoken';
+import MarksModel from '../models/marks.js';
 export const getLoginPage = (req, res, next) => {
   res.render('login', {
     path: '/login',
@@ -76,9 +77,28 @@ export const getHome = (req, res, next) => {
   });
 };
 
+export const getHomePage = (req, res, next) => {
+  res.render('drhome', {
+    path: '/drhome',
+    error: '',
+    id: req.user.id,
+    name: req.user.name,
+    email: req.user.email,
+    type: req.user.type,
+  });
+};
+
 export const getadditionalinfo = (req, res, next) => {
   res.render('additionalinfo', {
     path: '/additionalinfo',
+    error: '',
+    id: req.user.id,
+  });
+};
+
+export const getaddmarks = (req, res, next) => {
+  res.render('addmarks', {
+    path: '/addmarks',
     error: '',
     id: req.user.id,
   });
@@ -95,6 +115,18 @@ export const getInfo = async (req, res, next) => {
     number: additionalInfo.number,
     phone: additionalInfo.phone,
     city: additionalInfo.city,
+  });
+};
+
+export const getMarks = async (req, res, next) => {
+  const Marks = await MarksModel.find({
+    userId: req.user.id,
+  });
+  res.render('previewMarks', {
+    path: '/previewMarks',
+    error: '',
+    id: req.user.id,
+    Marks: Marks,
   });
 };
 export const logout = (req, res, next) => {

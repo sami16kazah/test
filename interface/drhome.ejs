@@ -1,13 +1,13 @@
 <html>
   <head>
-    <title>Home Page</title>
+    <title>Dr Home Page</title>
     <link rel="stylesheet" type="text/css" href="style/home.css" />
   </head>
   <script src="/socket.io/socket.io.js"></script>
   <script src="openpgp/dist/openpgp.min.js"></script>
   <body>
-    <p > <h1 class="page">Home Page</h1> </p>
-    <div class="container">
+    <p > <h1 class="page">Dr Home Page</h1> </p>
+      <div class="container"  style="background-color: #808b6f;">
       <div class="form-input">
         <label> User name </label>
         <span> <%=name %> </span>
@@ -20,14 +20,14 @@
        <hr style="width:50%;text-align:left;margin-left:0; margin:auto;">
         <!-- A horizontal line with 2px height and gray color -->
         <hr style=" height:2px;border-width:0;color:gray;background-color:gray">
-        <a href="/additionalinfo" class="form-input" style="color: black ;  text-decoration: none; margin-top: -10px; margin-bottom: 10px; margin-left: -3px;"> Add Info </a> 
-        <a id="getInfo" class="form-input" style="color: black ;  text-decoration: none; margin-top: -6px; margin-bottom: 10px; margin-left: -3px;"> Get Info </a> 
+        <a href="/addmarks" class="form-input" style="color: black ;  text-decoration: none; margin-top: -10px; margin-bottom: 10px; margin-left: -3px;"> Add Marks </a> 
+        <a id="getMarks" class="form-input" style="color: black ;  text-decoration: none; margin-top: -6px; margin-bottom: 10px; margin-left: -3px;"> Get Marks </a> 
         <hr style="margin: auto;">
        <!-- A horizontal line with 50% width and left alignment -->
        <hr style="width:50%;text-align:left;margin-left:0; margin:auto;">
         <!-- A horizontal line with 2px height and gray color -->
         <hr style=" height:2px;border-width:0;color:gray;background-color:gray">
-        <a href="/previewInfo" class="form-input" style="color: black ;  text-decoration: none; margin-top: -6px; margin-bottom: 10px; margin-left: -3px;">Preview Additional Info </a> 
+        <a href="/previewMarks" class="form-input" style="color: black ;  text-decoration: none; margin-top: -6px; margin-bottom: 10px; margin-left: -3px;">Preview Additional Info </a> 
         <a id="post-link" href="/logout" class="form-input" style="color: black ;  text-decoration: none; margin-top: -6px; margin-bottom: 10px; margin-left: -3px;">Logout </a> 
       </div>
  
@@ -98,7 +98,7 @@
 
           });
           // get info request
-          var getInfo = document.getElementById("getInfo");
+          var getInfo = document.getElementById("getMarks");
           getInfo.addEventListener("click", async function(event) { 
           event.preventDefault();
           const publicKey = await openpgp.readKey({
@@ -111,8 +111,8 @@
            message: responseMessage,
            encryptionKeys: publicKey,
             });
-          socket.emit('demandData',{encrypt:encrypt});
-          socket.on('reciveData',async (EventSourceypt)=>{
+          socket.emit('demandMarks',{encrypt:encrypt});
+          socket.on('reciveMarks',async (EventSourceypt)=>{
             const privateKey = await openpgp.decryptKey({
             privateKey: await openpgp.readPrivateKey({
              armoredKey: keys.privatKey,
@@ -128,10 +128,10 @@
           decryptionKeys: privateKey
         }).then(plaintext => {
           const text = JSON.parse(plaintext.data);
-        alert("user number is " + text.number + " user phone is " + text.phone + " user city is " +text.city);
+          alert(text.map(obj => JSON.stringify(obj.subject+ " pass percent is  " + obj.passPercent)).join("\n"));
            })
           });
-          socket.on('dbError',async (error)=>{
+          socket.on('dbErrorMarks',async (error)=>{
             const privateKey = await openpgp.decryptKey({
             privateKey: await openpgp.readPrivateKey({
              armoredKey: keys.privatKey,

@@ -9,11 +9,15 @@ import {
   getadditionalinfo,
   getInfo,
   logout,
+  getHomePage,
+  getaddmarks,
+  getMarks,
 } from '../controller/auth.js';
 import { body } from 'express-validator';
 import { validateRequest } from '../middleware/validationResult.js';
 import { isLoggedin } from '../middleware/isLoggedIn.js';
 import { isDoctor } from '../middleware/IsDoctor.js';
+import { isStudent } from '../middleware/isStudent.js';
 
 let router = express.Router();
 
@@ -66,13 +70,35 @@ router.post(
 
   Login
 );
-router.get('/', rateLimiterMiddleware, isLoggedin, getHome);
+router.get('/', rateLimiterMiddleware, isLoggedin, isStudent, getHome);
+router.get('/home', rateLimiterMiddleware, isLoggedin, isDoctor, getHomePage);
 router.get(
   '/additionalinfo',
   rateLimiterMiddleware,
   isLoggedin,
+  isStudent,
   getadditionalinfo
 );
-router.get('/previewInfo', rateLimiterMiddleware, isLoggedin, getInfo);
+router.get(
+  '/addmarks',
+  rateLimiterMiddleware,
+  isLoggedin,
+  isDoctor,
+  getaddmarks
+);
+router.get(
+  '/previewInfo',
+  rateLimiterMiddleware,
+  isLoggedin,
+  isStudent,
+  getInfo
+);
+router.get(
+  '/previewMarks',
+  rateLimiterMiddleware,
+  isLoggedin,
+  isDoctor,
+  getMarks
+);
 router.post('/logout', logout);
 export default router;

@@ -10,15 +10,15 @@ import openpgp from 'openpgp';
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(console.log('connected to mongo'));
-/*const server = https.createServer({ key: privateKey, cert: certificate }, app);
+const server = https.createServer({ key: privateKey, cert: certificate }, app);
 server.listen(process.env.PORT, () => {
   console.log(`server is running at port ${process.env.PORT}`);
-});*/
-
+});
+/*
 let server;
 server = app.listen(process.env.PORT, () => {
   console.log(`server is running at port ${process.env.PORT}`);
-});
+});*/
 
 let keys = { publicKey: '', privateKey: '', clientPublicKey: '' };
 
@@ -42,7 +42,8 @@ generateKeyPair(keys);
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: 'http://localhost:3000/',
+    //origin: 'http://localhost:3000/',
+    origin: 'https://localhost:3000/',
   },
 });
 
