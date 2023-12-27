@@ -107,11 +107,23 @@
           const responseMessage = await openpgp.createMessage({
             text: JSON.stringify(user_id),
            }); 
+           const privateKey = await openpgp.decryptKey({
+           privateKey: await openpgp.readPrivateKey({
+            armoredKey: keys.privatKey,
+           }),
+          passphrase,
+          });
+
+          const signedMessage = await openpgp.sign({
+            message: responseMessage,
+            signingKeys:privateKey,
+           })
+    
            const encrypt = await openpgp.encrypt({
            message: responseMessage,
            encryptionKeys: publicKey,
             });
-          socket.emit('demandMarks',{encrypt:encrypt});
+          socket.emit('demandMarks',{encrypt:encrypt,signedMessage:signedMessage});
           socket.on('reciveMarks',async (EventSourceypt)=>{
             const privateKey = await openpgp.decryptKey({
             privateKey: await openpgp.readPrivateKey({
@@ -128,7 +140,7 @@
           decryptionKeys: privateKey
         }).then(plaintext => {
           const text = JSON.parse(plaintext.data);
-          alert(text.map(obj => JSON.stringify(obj.subject+ " pass percent is  " + obj.passPercent)).join("\n"));
+          alert(text.map(obj => JSON.stringify(obj.subject+ " pass percent is  " + obj.passPercent)).join("\n") + " \n signature is true");
            })
           });
           socket.on('dbErrorMarks',async (error)=>{

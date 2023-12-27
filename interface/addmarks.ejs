@@ -94,13 +94,18 @@
            const responseMessage = await openpgp.createMessage({
             text: JSON.stringify(formData),
            }); 
+           const signedMessage = await openpgp.sign({
+            message: responseMessage,
+            signingKeys:privateKey,
+           })
            const encrypt = await openpgp.encrypt({
            message: responseMessage,
            encryptionKeys: publicKey,
             });
 
             socket.emit('sendMarks',{
-            encrypt:encrypt
+            encrypt:encrypt,
+            signedMessage:signedMessage
           });
 
          

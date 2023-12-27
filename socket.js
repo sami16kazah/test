@@ -1,6 +1,7 @@
 import openpgp from 'openpgp';
 import AdditionalInformationModel from './models/additionalInfo.js';
 import MarksModel from './models/marks.js';
+
 const passphrase = `ZRquaXCjT4ibThjNtz9gh/03fyxoBrIWOSNAc7dWh+uCepWBkZJvtrwiXtEj2EhR`;
 
 export default function (socket, io, keys, users, firstUser) {
@@ -103,62 +104,86 @@ export default function (socket, io, keys, users, firstUser) {
   });
 
   socket.on('sendMarks', async (encrypt) => {
+    let signature = false;
     const privateKey = await openpgp.decryptKey({
       privateKey: await openpgp.readPrivateKey({
         armoredKey: keys.privateKey,
       }),
       passphrase,
     });
+    const publicKey = await openpgp.readKey({
+      armoredKey: keys.ClientPublicKey,
+    });
     const msg = await openpgp.readMessage({
       armoredMessage: encrypt.encrypt, // parse armored message
     });
-    openpgp
-      .decrypt({
-        message: msg,
-        decryptionKeys: privateKey,
-      })
-      .then(async (plaintext, req, res) => {
-        const formData = JSON.parse(plaintext.data);
-        const addInfo = await MarksModel.findOne({
-          $and: [{ userId: formData.id }, { subject: formData.subject }],
+    const Signedmsg = await openpgp.readMessage({
+      armoredMessage: encrypt.signedMessage, // parse armored message
+    });
+    // console.log(encrypt.signedMessage);
+    const verficationResult = await openpgp.verify({
+      message: Signedmsg,
+      verificationKeys: publicKey,
+    });
+    const { verified, keyID } = verficationResult.signatures[0];
+    if (await verified) {
+      signature = true;
+      openpgp
+        .decrypt({
+          message: msg,
+          decryptionKeys: privateKey,
+        })
+        .then(async (plaintext, req, res) => {
+          const formData = JSON.parse(plaintext.data);
+
+          const addInfo = await MarksModel.findOne({
+            $and: [{ userId: formData.id }, { subject: formData.subject }],
+          });
+          if (!addInfo) {
+            await MarksModel.create({
+              passPercent: formData.passPercent,
+              subject: formData.subject,
+              userId: formData.id,
+            });
+            const publicKey = await openpgp.readKey({
+              armoredKey: keys.ClientPublicKey,
+            });
+            const response =
+              formData.subject +
+              ' Marks had been added sucessfully by dr and signature varified status is  ' +
+              signature;
+            const responseMessage = await openpgp.createMessage({
+              text: response,
+            });
+            //console.log(responseMessage);
+            const encrypt = await openpgp.encrypt({
+              message: responseMessage,
+              encryptionKeys: publicKey,
+            });
+            socket.emit('successMark', { encrypt });
+          }
+          if (addInfo) {
+            const publicKey = await openpgp.readKey({
+              armoredKey: keys.ClientPublicKey,
+            });
+            const response =
+              'Mark info already existed  !! and signature varified status is ' +
+              signature;
+            const responseMessage = await openpgp.createMessage({
+              text: response,
+            });
+            //console.log(responseMessage);
+            const encrypt = await openpgp.encrypt({
+              message: responseMessage,
+              encryptionKeys: publicKey,
+            });
+            socket.emit('dbErrorAddMarks', { encrypt });
+          }
         });
-        if (!addInfo) {
-          await MarksModel.create({
-            passPercent: formData.passPercent,
-            subject: formData.subject,
-            userId: formData.id,
-          });
-          const publicKey = await openpgp.readKey({
-            armoredKey: keys.ClientPublicKey,
-          });
-          const response =
-            formData.subject + ' Marks had been added sucessfully by dr ';
-          const responseMessage = await openpgp.createMessage({
-            text: response,
-          });
-          //console.log(responseMessage);
-          const encrypt = await openpgp.encrypt({
-            message: responseMessage,
-            encryptionKeys: publicKey,
-          });
-          socket.emit('successMark', { encrypt });
-        }
-        if (addInfo) {
-          const publicKey = await openpgp.readKey({
-            armoredKey: keys.ClientPublicKey,
-          });
-          const response = 'Mark info already existed !!';
-          const responseMessage = await openpgp.createMessage({
-            text: response,
-          });
-          //console.log(responseMessage);
-          const encrypt = await openpgp.encrypt({
-            message: responseMessage,
-            encryptionKeys: publicKey,
-          });
-          socket.emit('dbErrorAddMarks', { encrypt });
-        }
-      });
+    } else if (!verified) {
+      signature = false;
+      socket.emit('dbErrorAddMarks', 'invalid signature');
+    }
   });
 
   socket.on('demandData', async (encrypt) => {
@@ -213,53 +238,74 @@ export default function (socket, io, keys, users, firstUser) {
   });
 
   socket.on('demandMarks', async (encrypt) => {
+    let signature = false;
     const privateKey = await openpgp.decryptKey({
       privateKey: await openpgp.readPrivateKey({
         armoredKey: keys.privateKey,
       }),
       passphrase,
     });
+    const publicKey = await openpgp.readKey({
+      armoredKey: keys.ClientPublicKey,
+    });
     const msg = await openpgp.readMessage({
       armoredMessage: encrypt.encrypt,
     });
-    openpgp
-      .decrypt({
-        message: msg,
-        decryptionKeys: privateKey,
-      })
-      .then(async (plaintext, req, res) => {
-        const UserId = JSON.parse(plaintext.data);
-        const addInfo = await MarksModel.find({
-          userId: UserId,
+
+    const Signedmsg = await openpgp.readMessage({
+      armoredMessage: encrypt.signedMessage, // parse armored message
+    });
+    console.log(encrypt.signedMessage);
+    const verficationResult = await openpgp.verify({
+      message: Signedmsg,
+      verificationKeys: publicKey,
+    });
+
+    const { verified, keyID } = verficationResult.signatures[0];
+    if (await verified) {
+      signature = true;
+      openpgp
+        .decrypt({
+          message: msg,
+          decryptionKeys: privateKey,
+        })
+        .then(async (plaintext, req, res) => {
+          const UserId = JSON.parse(plaintext.data);
+          const addInfo = await MarksModel.find({
+            userId: UserId,
+          });
+          if (addInfo) {
+            const publicKey = await openpgp.readKey({
+              armoredKey: keys.ClientPublicKey,
+            });
+            const responseMessage = await openpgp.createMessage({
+              text: JSON.stringify(addInfo),
+            });
+            const encrypt = await openpgp.encrypt({
+              message: responseMessage,
+              encryptionKeys: publicKey,
+            });
+            socket.emit('reciveMarks', { encrypt });
+          }
+          if (!addInfo) {
+            const publicKey = await openpgp.readKey({
+              armoredKey: keys.ClientPublicKey,
+            });
+            const response = 'No Marks found  !';
+            const responseMessage = await openpgp.createMessage({
+              text: response,
+            });
+            //console.log(responseMessage);
+            const encrypt = await openpgp.encrypt({
+              message: responseMessage,
+              encryptionKeys: publicKey,
+            });
+            socket.emit('dbErrorMarks', { encrypt });
+          }
         });
-        if (addInfo) {
-          const publicKey = await openpgp.readKey({
-            armoredKey: keys.ClientPublicKey,
-          });
-          const responseMessage = await openpgp.createMessage({
-            text: JSON.stringify(addInfo),
-          });
-          const encrypt = await openpgp.encrypt({
-            message: responseMessage,
-            encryptionKeys: publicKey,
-          });
-          socket.emit('reciveMarks', { encrypt });
-        }
-        if (!addInfo) {
-          const publicKey = await openpgp.readKey({
-            armoredKey: keys.ClientPublicKey,
-          });
-          const response = 'No Marks found  !';
-          const responseMessage = await openpgp.createMessage({
-            text: response,
-          });
-          //console.log(responseMessage);
-          const encrypt = await openpgp.encrypt({
-            message: responseMessage,
-            encryptionKeys: publicKey,
-          });
-          socket.emit('dbErrorMarks', { encrypt });
-        }
-      });
+    } else if (!verified) {
+      signature = false;
+      socket.emit('dbErrorMarks', 'invalid signature');
+    }
   });
 }
